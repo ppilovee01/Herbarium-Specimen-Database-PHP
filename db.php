@@ -31,9 +31,36 @@ try {
         ethnobotanical_notes TEXT,
         medical_notes TEXT,
         
+        -- ฟิลด์คำแปลภาษาไทยสำหรับโหมดออฟไลน์
+        description_th TEXT,
+        habit_th VARCHAR(100),
+        habitat_th TEXT,
+        associated_species_th TEXT,
+        taxonomical_notes_th TEXT,
+        ethnobotanical_notes_th TEXT,
+        medical_notes_th TEXT,
+        
         image_path VARCHAR(255), created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+    // ดำเนินการเพิ่มคอลัมน์คำแปลภาษาไทยหากมีตารางอยู่แล้ว
+    $columns_to_add = [
+        'description_th' => 'TEXT',
+        'habit_th' => 'VARCHAR(100)',
+        'habitat_th' => 'TEXT',
+        'associated_species_th' => 'TEXT',
+        'taxonomical_notes_th' => 'TEXT',
+        'ethnobotanical_notes_th' => 'TEXT',
+        'medical_notes_th' => 'TEXT'
+    ];
+    foreach ($columns_to_add as $colName => $colType) {
+        try {
+            $pdo->exec("ALTER TABLE herbariums ADD COLUMN $colName $colType");
+        } catch (Exception $e) {
+            // คอลัมน์อาจจะมีอยู่แล้ว ข้ามข้อผิดพลาดนี้ไป
+        }
+    }
 } catch(PDOException $e) { die("Error: " . $e->getMessage()); }
 
 $upload_dir = __DIR__ . '/uploads/'; if (!is_dir($upload_dir)) { mkdir($upload_dir, 0777, true); }
