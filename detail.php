@@ -66,14 +66,67 @@ if (!empty($plant['thumbnail_path']) && file_exists(__DIR__ . '/' . $plant['thum
                     <p class="flex flex-col sm:flex-row border-b border-gray-100 pb-2 mb-6"><span class="font-bold text-gray-900 w-40 sm:w-48 shrink-0 mb-1 sm:mb-0">Locality:</span> <span class="leading-relaxed"><?= nl2br(htmlspecialchars($plant['locality'] ?? '')) ?: '-' ?></span></p>
                     
                     <div class="pt-4"></div>
-                    <p class="flex border-b border-gray-100 pb-2"><span class="font-bold text-gray-900 w-40 sm:w-48 shrink-0">Habit:</span> <span><?= htmlspecialchars($plant['habit'] ?? '') ?: '-' ?></span></p>
-                    <p class="flex border-b border-gray-100 pb-2"><span class="font-bold text-gray-900 w-40 sm:w-48 shrink-0">Habitat:</span> <span><?= htmlspecialchars($plant['habitat'] ?? '') ?: '-' ?></span></p>
-                    <div class="border-b border-gray-100 pb-2 mb-2"><span class="font-bold text-gray-900 block mb-1">Plant Description:</span> <p class="bg-gray-50 p-3 rounded text-gray-700 leading-relaxed"><?= nl2br(htmlspecialchars($plant['description'] ?? '')) ?: '-' ?></p></div>
+                    <p class="flex border-b border-gray-100 pb-2">
+                        <span class="font-bold text-gray-900 w-40 sm:w-48 shrink-0">Habit:</span> 
+                        <span>
+                            <?= htmlspecialchars($plant['habit'] ?? '') ?: '-' ?>
+                            <?php if(!empty($plant['habit_th'])): ?> <span class="text-green-700 font-bold ml-2">/ <?= htmlspecialchars($plant['habit_th']) ?></span><?php endif; ?>
+                        </span>
+                    </p>
+                    <p class="flex border-b border-gray-100 pb-2">
+                        <span class="font-bold text-gray-900 w-40 sm:w-48 shrink-0">Habitat:</span> 
+                        <span>
+                            <?= htmlspecialchars($plant['habitat'] ?? '') ?: '-' ?>
+                            <?php if(!empty($plant['habitat_th'])): ?> <span class="text-green-700 font-bold block mt-1">/ <?= htmlspecialchars($plant['habitat_th']) ?></span><?php endif; ?>
+                        </span>
+                    </p>
+                    <div class="border-b border-gray-100 pb-2 mb-2">
+                        <span class="font-bold text-gray-900 block mb-1">Plant Description:</span> 
+                        <p class="bg-gray-50 p-3 rounded text-gray-700 leading-relaxed"><?= nl2br(htmlspecialchars($plant['description'] ?? '')) ?: '-' ?></p>
+                        <?php if(!empty($plant['description_th'])): ?>
+                            <p class="bg-green-50/50 border-l-4 border-green-700 p-3 rounded mt-1 text-green-900 leading-relaxed"><span class="text-xs font-bold text-green-800 uppercase block mb-1">คำแปลภาษาไทย:</span> <?= nl2br(htmlspecialchars($plant['description_th'])) ?></p>
+                        <?php endif; ?>
+                    </div>
                     
-                    <?php if($plant['associated_species']): ?><div class="border-b border-gray-100 pb-2 mb-2"><span class="font-bold text-gray-900 block mb-1">Associated Species:</span> <p class="text-gray-600"><?= nl2br(htmlspecialchars($plant['associated_species'] ?? '')) ?></p></div><?php endif; ?>
-                    <?php if($plant['taxonomical_notes']): ?><div class="border-b border-gray-100 pb-2 mb-2"><span class="font-bold text-gray-900 block mb-1">Taxonomical Notes:</span> <p class="text-gray-600"><?= nl2br(htmlspecialchars($plant['taxonomical_notes'] ?? '')) ?></p></div><?php endif; ?>
-                    <?php if($plant['ethnobotanical_notes']): ?><div class="border-b border-gray-100 pb-2 mb-2"><span class="font-bold text-gray-900 block mb-1">Ethnobotanical Notes:</span> <p class="bg-yellow-50 p-3 rounded text-gray-700"><?= nl2br(htmlspecialchars($plant['ethnobotanical_notes'] ?? '')) ?></p></div><?php endif; ?>
-                    <?php if($plant['medical_notes']): ?><div class="border-b border-gray-100 pb-2 mb-2"><span class="font-bold text-gray-900 block mb-1">Medicinal Use Notes:</span> <p class="bg-blue-50 p-3 rounded text-blue-800"><?= nl2br(htmlspecialchars($plant['medical_notes'] ?? '')) ?></p></div><?php endif; ?>
+                    <?php if($plant['associated_species']): ?>
+                        <div class="border-b border-gray-100 pb-2 mb-2">
+                            <span class="font-bold text-gray-900 block mb-1">Associated Species:</span> 
+                            <p class="text-gray-600"><?= nl2br(htmlspecialchars($plant['associated_species'] ?? '')) ?></p>
+                            <?php if(!empty($plant['associated_species_th'])): ?>
+                                <p class="bg-green-50/50 border-l-4 border-green-700 p-2.5 rounded mt-1 text-green-900 leading-relaxed text-xs"><span class="font-bold block mb-0.5">พันธุ์ไม้ที่พบร่วม (ไทย):</span> <?= nl2br(htmlspecialchars($plant['associated_species_th'])) ?></p>
+                            <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
+                    
+                    <?php if($plant['taxonomical_notes']): ?>
+                        <div class="border-b border-gray-100 pb-2 mb-2">
+                            <span class="font-bold text-gray-900 block mb-1">Taxonomical Notes:</span> 
+                            <p class="text-gray-600"><?= nl2br(htmlspecialchars($plant['taxonomical_notes'] ?? '')) ?></p>
+                            <?php if(!empty($plant['taxonomical_notes_th'])): ?>
+                                <p class="bg-green-50/50 border-l-4 border-green-700 p-2.5 rounded mt-1 text-green-900 leading-relaxed text-xs"><span class="font-bold block mb-0.5">บันทึกทางอนุกรมวิธาน (ไทย):</span> <?= nl2br(htmlspecialchars($plant['taxonomical_notes_th'])) ?></p>
+                            <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
+                    
+                    <?php if($plant['ethnobotanical_notes']): ?>
+                        <div class="border-b border-gray-100 pb-2 mb-2">
+                            <span class="font-bold text-gray-900 block mb-1">Ethnobotanical Notes:</span> 
+                            <p class="bg-yellow-50 p-3 rounded text-gray-700"><?= nl2br(htmlspecialchars($plant['ethnobotanical_notes'] ?? '')) ?></p>
+                            <?php if(!empty($plant['ethnobotanical_notes_th'])): ?>
+                                <p class="bg-green-50/50 border-l-4 border-green-700 p-2.5 rounded mt-1 text-green-900 leading-relaxed text-xs"><span class="font-bold block mb-0.5">บันทึกพฤกษศาสตร์พื้นบ้าน (ไทย):</span> <?= nl2br(htmlspecialchars($plant['ethnobotanical_notes_th'])) ?></p>
+                            <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
+                    
+                    <?php if($plant['medical_notes']): ?>
+                        <div class="border-b border-gray-100 pb-2 mb-2">
+                            <span class="font-bold text-gray-900 block mb-1">Medicinal Use Notes:</span> 
+                            <p class="bg-blue-50 p-3 rounded text-blue-800"><?= nl2br(htmlspecialchars($plant['medical_notes'] ?? '')) ?></p>
+                            <?php if(!empty($plant['medical_notes_th'])): ?>
+                                <p class="bg-green-50/50 border-l-4 border-green-700 p-2.5 rounded mt-1 text-green-900 leading-relaxed text-xs"><span class="font-bold block mb-0.5">บันทึกสรรพคุณทางยา (ไทย):</span> <?= nl2br(htmlspecialchars($plant['medical_notes_th'])) ?></p>
+                            <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
