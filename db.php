@@ -64,4 +64,50 @@ try {
 } catch(PDOException $e) { die("Error: " . $e->getMessage()); }
 
 $upload_dir = __DIR__ . '/uploads/'; if (!is_dir($upload_dir)) { mkdir($upload_dir, 0777, true); }
+
+function translate_text_to_thai($text) {
+    if (empty(trim($text))) return '';
+    $url = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=th&dt=t&q=" . urlencode($text);
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36");
+    curl_setopt($ch, CURLOPT_TIMEOUT, 3); // 3 seconds timeout
+    $response = curl_exec($ch);
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    
+    if ($http_code !== 200 || $response === false) {
+        return '';
+    }
+    $json = json_decode($response, true);
+    if (!is_array($json) || empty($json[0])) {
+        return '';
+    }
+    $translated = '';
+    foreach ($json[0] as $sentence) {
+        $translated .= $sentence[0] ?? '';
+    }
+    return $translated;
+}
+
+function get_thai_translation_if_needed($text) {
+    if (empty(trim($text))) return '';
+    if (preg_match('/[ก-๙]/u', $text)) {
+        return $text;
+    }
+    if (preg_match('/[a-zA-Z]/', $text)) {
+        return translate_text_to_thai($text);
+    }
+    return $text;
+}
+
+function is_online() {
+    $connected = @fsockopen("translate.googleapis.com", 80, $errno, $errstr, 1.5);
+    if ($connected) {
+        fclose($connected);
+        return true;
+    }
+    return false;
+}
 ?>

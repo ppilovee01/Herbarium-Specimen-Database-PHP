@@ -38,10 +38,36 @@ $sql = "SELECT * FROM herbariums $whereSQL ORDER BY id DESC LIMIT $limit OFFSET 
 $stmt = $pdo->prepare($sql); $stmt->execute($params);
 $plants = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+// ตรวจสอบพรรณไม้ที่ยังไม่ได้แปลภาษาไทย (ช่วงออฟไลน์)
+$stmtPending = $pdo->query("SELECT COUNT(*) FROM herbariums 
+    WHERE (description IS NOT NULL AND description != '' AND (description_th IS NULL OR description_th = ''))
+       OR (habitat IS NOT NULL AND habitat != '' AND (habitat_th IS NULL OR habitat_th = ''))");
+$pending_count = $stmtPending->fetchColumn();
+$is_online = ($pending_count > 0) ? is_online() : false;
+
 require_once 'header.php';
 ?>
 
 <div class="max-w-7xl mx-auto my-4 sm:my-8 px-4 sm:px-6 lg:px-8">
+    <?php if(isset($_GET['sync_success'])): ?>
+        <div class="bg-green-50 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded-xl shadow-sm text-sm font-medium">
+            ✅ ซิงค์คำแปลภาษาไทยสำเร็จเรียบร้อยแล้วจำนวน <span class="font-bold"><?= (int)$_GET['sync_success'] ?></span> รายการ!
+        </div>
+    <?php endif; ?>
+
+    <?php if($pending_count > 0 && $is_online): ?>
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded-xl shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div class="flex items-center gap-3">
+                <span class="text-xl">🔄</span>
+                <div>
+                    <p class="text-blue-800 font-bold text-sm sm:text-base">ตรวจพบพรรณไม้ที่ยังไม่ได้แปลภาษาไทย (บันทึกช่วงออฟไลน์)</p>
+                    <p class="text-blue-600 text-xs mt-0.5">พบทั้งหมด <span class="font-bold text-blue-800"><?= $pending_count ?></span> รายการที่กรอกไว้ตอนออฟไลน์ สามารถกดซิงค์แปลภาษาไทยเมื่อเชื่อมต่อเน็ตแล้ว</p>
+                </div>
+            </div>
+            <a href="sync_translations.php" class="w-full sm:w-auto text-center bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-lg text-xs sm:text-sm shadow transition">⚡ เริ่มซิงค์คำแปล</a>
+        </div>
+    <?php endif; ?>
+
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
             <h2 class="text-xl sm:text-2xl font-bold text-gray-800">⚙️ จัดการข้อมูลพรรณไม้แห้ง</h2>

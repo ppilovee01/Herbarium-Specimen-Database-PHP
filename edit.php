@@ -43,6 +43,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $taxo = trim($_POST['taxonomical_notes']);
     $ethno = trim($_POST['ethnobotanical_notes']);
     $medical = trim($_POST['medical_notes']);
+
+    // รับค่าคำแปลภาษาไทยเพิ่มเติมจากหน้าฟอร์ม
+    $desc_th = trim($_POST['description_th'] ?? '');
+    $habit_th = trim($_POST['habit_th'] ?? '');
+    $habitat_th = trim($_POST['habitat_th'] ?? '');
+    $associated_th = trim($_POST['associated_species_th'] ?? '');
+    $taxo_th = trim($_POST['taxonomical_notes_th'] ?? '');
+    $ethno_th = trim($_POST['ethnobotanical_notes_th'] ?? '');
+    $medical_th = trim($_POST['medical_notes_th'] ?? '');
+
+    // ระบบแปลภาษาอัตโนมัติหากเชื่อมต่ออินเทอร์เน็ต และคำแปลเก่าว่างหรือมีการปรับปรุงภาษาอังกฤษ
+    if (is_online()) {
+        if (empty($desc_th) || ($desc !== $plant['description'] && $desc_th === $plant['description_th'])) {
+            $desc_th = get_thai_translation_if_needed($desc);
+        }
+        if (empty($habit_th) || ($habit !== $plant['habit'] && $habit_th === $plant['habit_th'])) {
+            $habit_th = get_thai_translation_if_needed($habit);
+        }
+        if (empty($habitat_th) || ($habitat !== $plant['habitat'] && $habitat_th === $plant['habitat_th'])) {
+            $habitat_th = get_thai_translation_if_needed($habitat);
+        }
+        if (empty($associated_th) || ($associated !== $plant['associated_species'] && $associated_th === $plant['associated_species_th'])) {
+            $associated_th = get_thai_translation_if_needed($associated);
+        }
+        if (empty($taxo_th) || ($taxo !== $plant['taxonomical_notes'] && $taxo_th === $plant['taxonomical_notes_th'])) {
+            $taxo_th = get_thai_translation_if_needed($taxo);
+        }
+        if (empty($ethno_th) || ($ethno !== $plant['ethnobotanical_notes'] && $ethno_th === $plant['ethnobotanical_notes_th'])) {
+            $ethno_th = get_thai_translation_if_needed($ethno);
+        }
+        if (empty($medical_th) || ($medical !== $plant['medical_notes'] && $medical_th === $plant['medical_notes_th'])) {
+            $medical_th = get_thai_translation_if_needed($medical);
+        }
+    }
     
     $image_path = $plant['image_path'];
     $thumbnail_path = $plant['thumbnail_path'];
@@ -121,7 +155,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ethnobotanical_notes = ?, 
         medical_notes = ?, 
         image_path = ?, 
-        thumbnail_path = ? 
+        thumbnail_path = ?, 
+        description_th = ?, 
+        habit_th = ?, 
+        habitat_th = ?, 
+        associated_species_th = ?, 
+        taxonomical_notes_th = ?, 
+        ethnobotanical_notes_th = ?, 
+        medical_notes_th = ? 
         WHERE id = ?");
         
     $stmt->execute([
@@ -149,6 +190,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $medical, 
         $image_path, 
         $thumbnail_path, 
+        $desc_th, 
+        $habit_th, 
+        $habitat_th, 
+        $associated_th, 
+        $taxo_th, 
+        $ethno_th, 
+        $medical_th, 
         $id
     ]);
     
@@ -239,35 +287,63 @@ require_once 'header.php';
             </div>
 
             <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                <h3 class="text-lg font-bold text-gray-800 border-b pb-2 mb-4">📝 ลักษณะทางพฤกษศาสตร์ และบันทึกเพิ่มเติม (Notes)</h3>
+                <h3 class="text-lg font-bold text-gray-800 border-b pb-2 mb-4">📝 ลักษณะทางพฤกษศาสตร์ และบันทึกเพิ่มเติม (Notes & Translations)</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
-                        <label class="block text-xs font-bold text-gray-600 mb-1">ลักษณะวิสัย (Habit)</label>
-                        <input type="text" name="habit" value="<?= htmlspecialchars($plant['habit'] ?? '') ?>" class="w-full px-3 py-2 border rounded-lg" placeholder="เช่น Tree, Shrub, Vine...">
+                        <label class="block text-xs font-bold text-gray-600 mb-1">ลักษณะวิสัย (Habit - English)</label>
+                        <input type="text" name="habit" value="<?= htmlspecialchars($plant['habit'] ?? '') ?>" class="w-full px-3 py-2 border rounded-lg text-sm" placeholder="เช่น Tree, Shrub, Vine...">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-600 mb-1">ถิ่นที่อยู่อาศัย (Habitat)</label>
-                        <input type="text" name="habitat" value="<?= htmlspecialchars($plant['habitat'] ?? '') ?>" class="w-full px-3 py-2 border rounded-lg">
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="block text-xs font-bold text-gray-600 mb-1">คำอธิบายลักษณะ (Plant Description)</label>
-                        <textarea name="description" rows="3" class="w-full px-3 py-2 border rounded-lg"><?= htmlspecialchars($plant['description'] ?? '') ?></textarea>
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="block text-xs font-bold text-gray-600 mb-1">พันธุ์ไม้ที่พบร่วม (Associated Species)</label>
-                        <textarea name="associated_species" rows="2" class="w-full px-3 py-2 border rounded-lg"><?= htmlspecialchars($plant['associated_species'] ?? '') ?></textarea>
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="block text-xs font-bold text-gray-600 mb-1">บันทึกทางอนุกรมวิธาน (Taxonomical Notes)</label>
-                        <textarea name="taxonomical_notes" rows="2" class="w-full px-3 py-2 border rounded-lg"><?= htmlspecialchars($plant['taxonomical_notes'] ?? '') ?></textarea>
+                        <label class="block text-xs font-bold text-green-700 mb-1">ลักษณะวิสัย (Habit - คำแปลภาษาไทย)</label>
+                        <input type="text" name="habit_th" value="<?= htmlspecialchars($plant['habit_th'] ?? '') ?>" class="w-full px-3 py-2 border border-green-200 rounded-lg bg-green-50/20 text-sm" placeholder="แปลไทยอัตโนมัติเมื่อออนไลน์หากปล่อยว่าง">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-600 mb-1">บันทึกพฤกษศาสตร์พื้นบ้าน (Ethnobotanical Notes)</label>
-                        <textarea name="ethnobotanical_notes" rows="2" class="w-full px-3 py-2 border rounded-lg"><?= htmlspecialchars($plant['ethnobotanical_notes'] ?? '') ?></textarea>
+                        <label class="block text-xs font-bold text-gray-600 mb-1">ถิ่นที่อยู่อาศัย (Habitat - English)</label>
+                        <input type="text" name="habitat" value="<?= htmlspecialchars($plant['habitat'] ?? '') ?>" class="w-full px-3 py-2 border rounded-lg text-sm">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-600 mb-1">บันทึกสรรพคุณทางยา (Medical Use Notes)</label>
-                        <textarea name="medical_notes" rows="2" class="w-full px-3 py-2 border rounded-lg"><?= htmlspecialchars($plant['medical_notes'] ?? '') ?></textarea>
+                        <label class="block text-xs font-bold text-green-700 mb-1">ถิ่นที่อยู่อาศัย (Habitat - คำแปลภาษาไทย)</label>
+                        <input type="text" name="habitat_th" value="<?= htmlspecialchars($plant['habitat_th'] ?? '') ?>" class="w-full px-3 py-2 border border-green-200 rounded-lg bg-green-50/20 text-sm" placeholder="แปลไทยอัตโนมัติเมื่อออนไลน์หากปล่อยว่าง">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-gray-600 mb-1">คำอธิบายลักษณะ (Plant Description - English)</label>
+                        <textarea name="description" rows="3" class="w-full px-3 py-2 border rounded-lg text-sm"><?= htmlspecialchars($plant['description'] ?? '') ?></textarea>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-green-700 mb-1">คำอธิบายลักษณะ (Plant Description - คำแปลภาษาไทย)</label>
+                        <textarea name="description_th" rows="3" class="w-full px-3 py-2 border border-green-200 rounded-lg bg-green-50/20 text-sm" placeholder="แปลไทยอัตโนมัติเมื่อออนไลน์หากปล่อยว่าง"><?= htmlspecialchars($plant['description_th'] ?? '') ?></textarea>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-gray-600 mb-1">พันธุ์ไม้ที่พบร่วม (Associated Species - English)</label>
+                        <textarea name="associated_species" rows="2" class="w-full px-3 py-2 border rounded-lg text-sm"><?= htmlspecialchars($plant['associated_species'] ?? '') ?></textarea>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-green-700 mb-1">พันธุ์ไม้ที่พบร่วม (Associated Species - คำแปลภาษาไทย)</label>
+                        <textarea name="associated_species_th" rows="2" class="w-full px-3 py-2 border border-green-200 rounded-lg bg-green-50/20 text-sm" placeholder="แปลไทยอัตโนมัติเมื่อออนไลน์หากปล่อยว่าง"><?= htmlspecialchars($plant['associated_species_th'] ?? '') ?></textarea>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-gray-600 mb-1">บันทึกทางอนุกรมวิธาน (Taxonomical Notes - English)</label>
+                        <textarea name="taxonomical_notes" rows="2" class="w-full px-3 py-2 border rounded-lg text-sm"><?= htmlspecialchars($plant['taxonomical_notes'] ?? '') ?></textarea>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-green-700 mb-1">บันทึกทางอนุกรมวิธาน (Taxonomical Notes - คำแปลภาษาไทย)</label>
+                        <textarea name="taxonomical_notes_th" rows="2" class="w-full px-3 py-2 border border-green-200 rounded-lg bg-green-50/20 text-sm" placeholder="แปลไทยอัตโนมัติเมื่อออนไลน์หากปล่อยว่าง"><?= htmlspecialchars($plant['taxonomical_notes_th'] ?? '') ?></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 mb-1">บันทึกพฤกษศาสตร์พื้นบ้าน (Ethnobotanical Notes - English)</label>
+                        <textarea name="ethnobotanical_notes" rows="2" class="w-full px-3 py-2 border rounded-lg text-sm"><?= htmlspecialchars($plant['ethnobotanical_notes'] ?? '') ?></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-green-700 mb-1">บันทึกพฤกษศาสตร์พื้นบ้าน (Ethnobotanical Notes - คำแปลภาษาไทย)</label>
+                        <textarea name="ethnobotanical_notes_th" rows="2" class="w-full px-3 py-2 border border-green-200 rounded-lg bg-green-50/20 text-sm" placeholder="แปลไทยอัตโนมัติเมื่อออนไลน์หากปล่อยว่าง"><?= htmlspecialchars($plant['ethnobotanical_notes_th'] ?? '') ?></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 mb-1">บันทึกสรรพคุณทางยา (Medical Use Notes - English)</label>
+                        <textarea name="medical_notes" rows="2" class="w-full px-3 py-2 border rounded-lg text-sm"><?= htmlspecialchars($plant['medical_notes'] ?? '') ?></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-green-700 mb-1">บันทึกสรรพคุณทางยา (Medical Use Notes - คำแปลภาษาไทย)</label>
+                        <textarea name="medical_notes_th" rows="2" class="w-full px-3 py-2 border border-green-200 rounded-lg bg-green-50/20 text-sm" placeholder="แปลไทยอัตโนมัติเมื่อออนไลน์หากปล่อยว่าง"><?= htmlspecialchars($plant['medical_notes_th'] ?? '') ?></textarea>
                     </div>
                 </div>
             </div>

@@ -82,14 +82,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // คำสั่ง SQL ที่ถูกต้องและตรงกับตารางล่าสุด (ตัดฟิลด์เก่าทิ้งหมด)
+    // แปลภาษาอัตโนมัติหากเชื่อมต่ออินเทอร์เน็ต
+    $desc_th = '';
+    $habit_th = '';
+    $habitat_th = '';
+    $associated_th = '';
+    $taxo_th = '';
+    $ethno_th = '';
+    $medical_th = '';
+
+    if (is_online()) {
+        $desc_th = get_thai_translation_if_needed($desc);
+        $habit_th = get_thai_translation_if_needed($habit);
+        $habitat_th = get_thai_translation_if_needed($habitat);
+        $associated_th = get_thai_translation_if_needed($associated);
+        $taxo_th = get_thai_translation_if_needed($taxo);
+        $ethno_th = get_thai_translation_if_needed($ethno);
+        $medical_th = get_thai_translation_if_needed($medical);
+    }
+
+    // คำสั่ง SQL ที่ถูกต้องและตรงกับตารางล่าสุด (รวมฟิลด์ภาษาไทย)
     $stmt = $pdo->prepare("INSERT INTO herbariums (
         user_id, barcode, specimen_id, plant_category, common_name_th, common_name_en, scientific_name, 
         family_name, genus, collector_name, collection_date, country, province, island, 
         elevation, locality, description, habit, habitat, associated_species, 
-        taxonomical_notes, ethnobotanical_notes, medical_notes, image_path, thumbnail_path
+        taxonomical_notes, ethnobotanical_notes, medical_notes, image_path, thumbnail_path,
+        description_th, habit_th, habitat_th, associated_species_th, taxonomical_notes_th, ethnobotanical_notes_th, medical_notes_th
     ) VALUES (
-        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
     )");
     
     // บันทึกข้อมูล
@@ -97,7 +117,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['user_id'], $barcode, $specimen_id, $category, $common_th, $common_en, $scientific, 
         $family, $genus, $collector, $coll_date, $country, $province, $island, 
         $elevation, $locality, $desc, $habit, $habitat, $associated, 
-        $taxo, $ethno, $medical, $image_path, $thumbnail_path
+        $taxo, $ethno, $medical, $image_path, $thumbnail_path,
+        $desc_th, $habit_th, $habitat_th, $associated_th, $taxo_th, $ethno_th, $medical_th
     ]);
     
     echo "<script>alert('บันทึกข้อมูลพรรณไม้สำเร็จ!'); window.location.href='dashboard.php';</script>";
