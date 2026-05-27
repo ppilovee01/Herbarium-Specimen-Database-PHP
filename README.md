@@ -130,3 +130,6 @@
 - `image_path` (VARCHAR(255))
 - `thumbnail_path` (VARCHAR(255))
 - `created_at` (TIMESTAMP)
+
+
+แหล่งข้อมูลพรรณไม้แห้งจาก : https://ntbg.org/database/herbarium
